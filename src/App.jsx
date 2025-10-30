@@ -1,10 +1,11 @@
 import { useState } from "react";
 import "./App.css";
 import { FULL_URL } from "./constants";
+import QueresBlock from "./components/QueresBlock";
 
 function App() {
   const [query, setQuery] = useState("");
-  const [result, setResult] = useState("");
+  const [result, setResult] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const handleQueryByAI = async (e) => {
@@ -33,7 +34,7 @@ function App() {
       let cleanData = text.split("* ");
       cleanData = cleanData.map((item)=> item.trim());
       
-      setResult(cleanData);
+      setResult([...result,{type:'q',text:query},{type:'a',text:cleanData}]);
       setQuery("");
     } catch (error) {
       console.error("Error fetching AI response: ", error);
@@ -57,7 +58,18 @@ function App() {
           <div className="p-4 m-4 h-3/4 overflow-y-auto">
           {
             result && result.map((item, index) => (
-              <p key={index} className="mb-2 text-left">{item}</p>
+              item.type === 'q'?
+              ( 
+                <div key={index} className="justify-end flex p-2">
+                  <span className="p-1 text-right border-6 border-zinc-700 bg-zinc-700 rounded-tl-2xl rounded-br-2xl rounded-bl-2xl w-fit text-xl">{item.text}</span>
+                </div>
+              ):
+              (
+                item.text.map((word,wordID)=>
+                  <QueresBlock key={wordID} index={wordID} ans={word} />
+                )
+              )
+              
             ))
           
           }
@@ -80,7 +92,7 @@ function App() {
               className="p-2 enter"
               disabled={loading || !query.trim()}
             >
-              {loading ? "Asking..." : "Ask"}
+              {loading ? "Processing..." : "Ask"}
             </button>
           </form>
         </div>
